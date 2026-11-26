@@ -18,9 +18,19 @@ const __dirname = path.dirname(__filename);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+const allowedOrigins = [
+    'http://localhost:5173',
+    process.env.FRONTEND_URL,
+].filter(Boolean);
+
 // Enable CORS configuration
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS.'));
+    },
     credentials: true
 }));
 
@@ -31,7 +41,7 @@ app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 
 // Then set up sessions and passport
-app.use(session({ secret: 'mario', resave: false, saveUninitialized: false }));
+app.use(session({ secret: process.env.SESSION_SECRET || 'dev-secret', resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
