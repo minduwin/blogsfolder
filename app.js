@@ -19,19 +19,19 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 const allowedOrigins = [
-    'http://localhost:5173',
-    process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL?.replace(/\/$/, ''),
+  'http://localhost:5173',
 ].filter(Boolean);
 
 // Enable CORS configuration
 app.use(cors({
-    origin(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-        return callback(new Error('Not allowed by CORS.'));
-    },
-    credentials: true
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS.'));
+  },
+  credentials: true,
 }));
 
 // Needs to parse incoming body data first
